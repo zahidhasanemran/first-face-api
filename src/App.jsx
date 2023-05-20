@@ -6,6 +6,7 @@ function App() {
 
   const videoRef = useRef();
   const canvasRef = useRef();
+  const desRef = useRef();
 
   //OPEN YOUR FACE CAM
   const startVideo = () =>{
@@ -25,7 +26,8 @@ function App() {
       faceapi.nets.tinyFaceDetector.loadFromUri("/weights"),
       faceapi.nets.faceLandmark68Net.loadFromUri("/weights"),
       faceapi.nets.faceRecognitionNet.loadFromUri("/weights"),
-      faceapi.nets.faceExpressionNet.loadFromUri("/weights")
+      faceapi.nets.faceExpressionNet.loadFromUri("/weights"),
+      faceapi.nets.ssdMobilenetv1.loadFromUri("/weights")
     ]).then(() => {
       detectMyFace()
     })
@@ -34,8 +36,11 @@ function App() {
   const detectMyFace = () => {
     setInterval(async () => {
       const detection = await faceapi.detectAllFaces(videoRef.current, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions();
+      const personData = await faceapi.detectSingleFace(videoRef.current);
+      
 
       canvasRef.current.innerHtml = faceapi.createCanvasFromMedia(videoRef.current)
+      desRef.current.innerHtml = JSON.stringify(personData.descriptor)
       faceapi.matchDimensions(canvasRef.current, {
         width: 940,
         height: 650
@@ -63,6 +68,7 @@ function App() {
           <video crossOrigin='anonymous' ref={videoRef} autoPlay ></video>
       </div>
       <canvas ref={canvasRef} width={940} height={650} className='appcanvas' ></canvas>
+      <div ref={desRef}></div>
     </div>
   )
 }
